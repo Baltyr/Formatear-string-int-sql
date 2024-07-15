@@ -1,5 +1,5 @@
 
-# Baltyr
+# NumFormatt
 %%%%%%%@%-=%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@%%+:#%@%%%%%
 %%%%%%%%%.  =%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@%%%+.  #%%%%%%%
 %%%%%%%%@.   .+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:    #%%%%%%%
@@ -35,7 +35,7 @@
 
 ## Descripción
 
-Baltyr es una aplicación simple en `tkinter` que formatea números y presenta una animación ASCII de fondo. La interfaz de usuario permite ingresar números, seleccionar el formato de salida (cadena o entero) y copiar el resultado al portapapeles.
+NumFormatt es una aplicación simple en `tkinter` que formatea números y presenta una animación ASCII de fondo. La interfaz de usuario permite ingresar números, seleccionar el formato de salida (cadena o entero) y copiar el resultado al portapapeles.
 
 ## Dependencias
 
@@ -51,11 +51,11 @@ Para ejecutar este proyecto, necesitas tener instalado Python 3.x y las siguient
 
 1. Clona el repositorio:
     ```bash
-    git clone https://github.com/tu_usuario/baltyr.git
+    git clone https://github.com/Baltyr/Formatear-string-int-sql
     ```
 2. Navega al directorio del proyecto:
     ```bash
-    cd baltyr
+    cd NumFormatt
     ```
 
 ## Uso
