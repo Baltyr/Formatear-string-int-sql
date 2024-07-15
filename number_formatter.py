@@ -140,7 +140,7 @@ style.configure("TText", background="#161b22", foreground="white", font=("Helvet
 
 # Configuración de variables
 format_type_var = tk.StringVar(value="String")
-total_numbers_var = tk.StringVar(value="Total numbers formatted: 0")
+total_numbers_var = tk.StringVar(value="Total formatted: 0")
 
 # Crear y organizar widgets
 main_frame = ttk.Frame(root, padding="10", style="TFrame")
