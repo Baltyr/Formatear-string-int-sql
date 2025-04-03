@@ -1,9 +1,10 @@
 import tkinter as tk
-from tkinter import ttk
-import itertools
+from tkinter import ttk, filedialog
 import math
 import time
+import threading
 
+# === Logica de Formato ===
 def format_numbers():
     numbers = input_text.get("1.0", "end-1c").split()
     format_type = format_type_var.get()
@@ -16,73 +17,73 @@ def format_numbers():
     output_text.delete("1.0", "end")
     output_text.insert("1.0", formatted_numbers)
 
-    total_numbers_var.set(f"Total numbers formatted: {len(numbers)}")
+    total_numbers_var.set(f"Total formateados: {len(numbers)}")
 
+# === Copiar ===
 def copy_to_clipboard():
     root.clipboard_clear()
     root.clipboard_append(output_text.get("1.0", "end-1c"))
-    root.update()  # Necessary to update the clipboard
+    root.update()
 
-def create_rounded_text(parent, **options):
-    frame_bg = options.pop('bg', '#0d1117')
-    radius = options.pop('radius', 20)
-    border_color = options.pop('border_color', '#238636')
-    border_width = options.pop('border_width', 2)
-    
-    frame = tk.Frame(parent, bg=frame_bg)
-    canvas = tk.Canvas(frame, bg=frame_bg, highlightthickness=0, width=options['width'] + 2 * radius, height=options['height'] + 2 * radius)
-    text = tk.Text(frame, **options, relief=tk.FLAT, bg="#161b22", fg="white", insertbackground="white", highlightthickness=0, wrap=tk.WORD)
+# === Guardar en archivo ===
+def export_output():
+    file = filedialog.asksaveasfilename(defaultextension=".txt",
+                                         filetypes=[("Text files", "*.txt"), ("CSV files", "*.csv")])
+    if file:
+        with open(file, "w", encoding="utf-8") as f:
+            f.write(output_text.get("1.0", "end-1c"))
 
-    def draw_rounded_rectangle(canvas, x1, y1, x2, y2, r=25, **kwargs):
-        points = [x1+r, y1,
-                  x1+r, y1,
-                  x2-r, y1,
-                  x2-r, y1,
-                  x2, y1,
-                  x2, y1+r,
-                  x2, y1+r,
-                  x2, y2-r,
-                  x2, y2-r,
-                  x2, y2,
-                  x2-r, y2,
-                  x2-r, y2,
-                  x1+r, y2,
-                  x1+r, y2,
-                  x1, y2,
-                  x1, y2-r,
-                  x1, y2-r,
-                  x1, y1+r,
-                  x1, y1+r,
-                  x1, y1]
-        return canvas.create_polygon(points, **kwargs, smooth=True)
+# === Toggle Modo Claro/Oscuro ===
+def toggle_theme():
+    global dark_mode
+    dark_mode = not dark_mode
+    bg = "#0d1117" if dark_mode else "#ffffff"
+    fg = "white" if dark_mode else "black"
+    box_bg = "#161b22" if dark_mode else "#e0e0e0"
+    text_bg = "#0d1117" if dark_mode else "#ffffff"
+    text_fg = "white" if dark_mode else "#000000"
+    insert_color = "white" if dark_mode else "black"
+    sub_fg = "#c9d1d9" if dark_mode else "#444444"
+    info_fg = "#8b949e" if dark_mode else "#666666"
 
-    # Create rounded rectangle
-    draw_rounded_rectangle(canvas, radius, radius, options['width'] + radius, options['height'] + radius, radius, outline=border_color, width=border_width)
-    canvas.pack(expand=True, fill=tk.BOTH)
-    text.place(x=radius, y=radius, width=options['width'], height=options['height'])
+    root.configure(bg=bg)
+    main_frame.configure(bg=bg)
+    title.configure(bg=bg, fg=fg)
+    options_frame.configure(bg=bg)
+    label.configure(bg=bg, fg=fg)
+    input_label.configure(bg=bg, fg=sub_fg)
+    output_label.configure(bg=bg, fg=sub_fg)
+    info_label.configure(bg=bg, fg=info_fg)
+    button_frame.configure(bg=bg)
+    canvas.configure(bg=bg)
+    tag_label.configure(bg=bg, fg="#58a6ff" if dark_mode else "#1f6feb")
 
-    return frame, text
+    input_text.configure(bg=text_bg, fg=text_fg, insertbackground=insert_color)
+    input_text.master.configure(bg=box_bg)
+    output_text.configure(bg=text_bg, fg=text_fg, insertbackground=insert_color)
+    output_text.master.configure(bg=box_bg)
 
-def create_modern_button(parent, text, command, **options):
-    button_color = options.pop('button_color', '#238636')
-    text_color = options.pop('text_color', 'white')
-    hover_color = options.pop('hover_color', '#2ea043')
-
-    button = tk.Button(parent, text=text, command=command, relief=tk.FLAT, bg=button_color, fg=text_color, font=("Helvetica", 12, "bold"),
-                       activebackground=button_color, activeforeground=text_color, cursor="hand2", bd=0, padx=10, pady=5)
-
-    def on_enter(e):
-        button['background'] = hover_color
-
-    def on_leave(e):
-        button['background'] = button_color
-
-    button.bind("<Enter>", on_enter)
-    button.bind("<Leave>", on_leave)
-
+# === Estilo Moderno de Botón ===
+def create_button(parent, text, command):
+    button = tk.Button(parent, text=text, command=command,
+                       bg="#1f6feb", fg="white",
+                       font=("Inter", 12, "bold"), bd=0,
+                       activebackground="#388bfd",
+                       activeforeground="white", padx=20, pady=10,
+                       cursor="hand2")
+    button.pack(side=tk.LEFT, padx=10)
     return button
 
-# Donut animation adapted for tkinter
+# === Estilo Caja ===
+def create_text_box(parent):
+    frame = tk.Frame(parent, bg="#161b22", bd=2, relief="ridge")
+    text = tk.Text(frame, wrap=tk.WORD, font=("Inter", 11), fg="white", bg="#0d1117",
+                   insertbackground="white", bd=0, height=6)
+    text.pack(expand=True, fill=tk.BOTH, padx=8, pady=8)
+    frame.pack(fill=tk.X, pady=10)
+    return text
+
+# === Animación Donut (no modificar) ===
 def donut_animation():
     A = 0
     B = 0
@@ -114,82 +115,87 @@ def donut_animation():
         for k in range(1760):
             output.append(b[k] if k % 80 else '\n')
         canvas.delete("all")
-        canvas.create_text(canvas.winfo_width() / 2, canvas.winfo_height() / 2, text=''.join(output), font=("Consolas", 8), fill="#1f6feb", anchor=tk.CENTER)
+        canvas.create_text(canvas.winfo_width() / 2, canvas.winfo_height() / 2,
+                           text=''.join(output), font=("Consolas", 8), fill="#1f6feb", anchor=tk.CENTER)
         root.update()
         A += 0.04
         B += 0.02
         time.sleep(0.03)
 
-# Configurar la ventana principal
+# === Animación Título con Tag ===
+def animate_title():
+    text = (
+        "    ___   __     __  __  ____   __  "
+        "\n   / __) /  \  _(  )(  )(  _ \ / _\ "
+        "\n  ( (_ \\(  0 )/ \\) \\ )(  )   //    \ "
+        "\n   \\___/ \\__/ \\____/(__)(__\\_)\\_/\\_/"
+    )
+    displayed = ""
+    for char in text:
+        displayed += char
+        tag_label.config(text=displayed)
+        root.update()
+        time.sleep(0.005)
+
+# === UI Principal ===
 root = tk.Tk()
-root.title("Number Formatter")
-root.geometry("700x700")
-root.resizable(False, False)
+root.title("Formateador de Números")
+root.geometry("700x850")
 root.configure(bg="#0d1117")
+root.resizable(False, False)
 
-# Estilos
-style = ttk.Style()
-style.theme_use("clam")
-style.configure("TLabel", font=("Helvetica", 12), background="#0d1117", foreground="white")
-style.configure("TButton", font=("Helvetica", 12), background="#238636", foreground="white", borderwidth=0, padding=10)
-style.configure("TEntry", font=("Helvetica", 12), padding=5)
-style.configure("TCombobox", font=("Helvetica", 12), padding=5, relief=tk.FLAT, background="#161b22", foreground="white", fieldbackground="#161b22")
-style.map("TCombobox", fieldbackground=[('readonly', '#161b22')], background=[('readonly', '#161b22')], foreground=[('readonly', 'white')])
-style.configure("TFrame", background="#0d1117")
-style.configure("TText", background="#161b22", foreground="white", font=("Helvetica", 12))
-
-# Configuración de variables
+# Variables
+dark_mode = True
 format_type_var = tk.StringVar(value="String")
-total_numbers_var = tk.StringVar(value="Total formatted: 0")
+total_numbers_var = tk.StringVar(value="Total formateados: 0")
 
-# Crear y organizar widgets
-main_frame = ttk.Frame(root, padding="10", style="TFrame")
-main_frame.pack(fill=tk.BOTH, expand=True)
+# === Layout Principal ===
+main_frame = tk.Frame(root, bg="#0d1117")
+main_frame.pack(padx=30, pady=30, fill=tk.BOTH, expand=True)
 
-input_frame = ttk.Frame(main_frame, padding="5", style="TFrame")
-input_frame.pack(fill=tk.BOTH, expand=True)
+# === Tag animado ===
+tag_label = tk.Label(main_frame, font=("Courier", 10, "bold"), bg="#0d1117", fg="#58a6ff", justify="left")
+tag_label.pack(pady=(0, 20))
+threading.Thread(target=animate_title, daemon=True).start()
 
-output_frame = ttk.Frame(main_frame, padding="5", style="TFrame")
-output_frame.pack(fill=tk.BOTH, expand=True)
+# === Opciones ===
+options_frame = tk.Frame(main_frame, bg="#0d1117")
+options_frame.pack(fill=tk.X)
 
-button_frame = ttk.Frame(main_frame, padding="5", style="TFrame")
-button_frame.pack(fill=tk.BOTH, expand=True)
+label = tk.Label(options_frame, text="Tipo de Formato:", font=("Inter", 12), bg="#0d1117", fg="white")
+label.pack(side=tk.LEFT)
 
-input_label_frame = ttk.Frame(input_frame, style="TFrame")
-input_label_frame.pack(fill=tk.X, padx=5, pady=5)
+combo = ttk.Combobox(options_frame, textvariable=format_type_var, state="readonly",
+                     values=["String", "Int"], font=("Inter", 11), width=10)
+combo.pack(side=tk.LEFT, padx=10)
 
-ttk.Label(input_label_frame, text="Ingresar valores (separados por espacio):", style="TLabel").pack(side=tk.LEFT, anchor=tk.W)
-format_options = ttk.Combobox(input_label_frame, textvariable=format_type_var, values=["String", "Int"], state="readonly", style="TCombobox")
-format_options.pack(side=tk.LEFT, anchor=tk.W, padx=5)
+# === Input ===
+input_label = tk.Label(main_frame, text="Ingresar valores separados por espacios:", font=("Inter", 11), bg="#0d1117", fg="#c9d1d9")
+input_label.pack(anchor=tk.W)
+input_text = create_text_box(main_frame)
 
-input_frame_inner, input_text = create_rounded_text(input_frame, width=500, height=100, border_color="#238636", border_width=2)
-input_frame_inner.pack(fill=tk.BOTH, padx=5, pady=20)  # Aumentar el padding para más espacio
+# === Output ===
+output_label = tk.Label(main_frame, text="Resultado:", font=("Inter", 11), bg="#0d1117", fg="#c9d1d9")
+output_label.pack(anchor=tk.W)
+output_text = create_text_box(main_frame)
 
-# Fondo de animación
-animation_frame = ttk.Frame(main_frame, padding="5", style="TFrame")
-animation_frame.pack(fill=tk.BOTH, expand=True)
+# === Botones ===
+button_frame = tk.Frame(main_frame, bg="#0d1117")
+button_frame.pack(pady=10)
 
-canvas = tk.Canvas(animation_frame, bg="#0d1117", highlightthickness=0)
-canvas.pack(fill=tk.BOTH, expand=True)
+create_button(button_frame, "Formatear", format_numbers)
+create_button(button_frame, "Copiar", copy_to_clipboard)
+create_button(button_frame, "Exportar", export_output)
+create_button(button_frame, "🌙/☀️ Tema", toggle_theme)
 
-ttk.Label(output_frame, text="Output:", style="TLabel").pack(anchor=tk.W, pady=5)
-output_frame_inner, output_text = create_rounded_text(output_frame, width=500, height=100, border_color="#238636", border_width=2)
-output_frame_inner.pack(fill=tk.BOTH, padx=5, pady=20)  # Aumentar el padding para más espacio
+# === Conteo ===
+info_label = tk.Label(main_frame, textvariable=total_numbers_var, font=("Inter", 10), bg="#0d1117", fg="#8b949e")
+info_label.pack(pady=10)
 
-buttons_container = ttk.Frame(button_frame, style="TFrame")
-buttons_container.pack()
+# === Animación Donut ===
+canvas = tk.Canvas(main_frame, bg="#0d1117", highlightthickness=0)
+canvas.pack(fill=tk.BOTH, expand=True, pady=20)
+threading.Thread(target=donut_animation, daemon=True).start()
 
-formatear_button = create_modern_button(buttons_container, text="Formatear", command=format_numbers, button_color="#238636", hover_color="#2ea043")
-formatear_button.grid(row=0, column=0, padx=10)
-
-copiar_button = create_modern_button(buttons_container, text="Copiar", command=copy_to_clipboard, button_color="#238636", hover_color="#2ea043")
-copiar_button.grid(row=0, column=1, padx=10)
-
-ttk.Label(button_frame, textvariable=total_numbers_var, style="TLabel").pack(pady=10)
-
-# Iniciar la animación de fondo
-import threading
-animation_thread = threading.Thread(target=donut_animation, daemon=True)
-animation_thread.start()
-
+# === Run ===
 root.mainloop()
