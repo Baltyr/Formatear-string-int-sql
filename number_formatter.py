@@ -37,18 +37,17 @@ def export_output():
 def toggle_theme():
     global dark_mode
     dark_mode = not dark_mode
-    bg = "#0d1117" if dark_mode else "#ffffff"
-    fg = "white" if dark_mode else "black"
-    box_bg = "#161b22" if dark_mode else "#e0e0e0"
+    bg = "#0d1117" if dark_mode else "#f8f9fa"
+    fg = "white" if dark_mode else "#212529"
+    box_bg = "#161b22" if dark_mode else "#dee2e6"
     text_bg = "#0d1117" if dark_mode else "#ffffff"
     text_fg = "white" if dark_mode else "#000000"
     insert_color = "white" if dark_mode else "black"
-    sub_fg = "#c9d1d9" if dark_mode else "#444444"
-    info_fg = "#8b949e" if dark_mode else "#666666"
+    sub_fg = "#c9d1d9" if dark_mode else "#495057"
+    info_fg = "#8b949e" if dark_mode else "#6c757d"
 
     root.configure(bg=bg)
     main_frame.configure(bg=bg)
-    title.configure(bg=bg, fg=fg)
     options_frame.configure(bg=bg)
     label.configure(bg=bg, fg=fg)
     input_label.configure(bg=bg, fg=sub_fg)
