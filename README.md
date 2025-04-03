@@ -74,13 +74,13 @@ pyinstaller --noconfirm --onefile --windowed --icon=icono.ico --name=Formateador
 Este proyecto fue creado con atención al detalle y pasión por la estética de interfaces en Python.
 
 ```
-     ___   __     __  __  ____   __  
+    ___   __     __  __  ____   __  
    / __) /  \  _(  )(  )(  _ \ / _\ 
   ( (_ \(  0 )/ \) \ )(  )   //    \ 
    \___/ \__/ \____/(__)(__\_)\_/\_/
 ```
 
-**🛠 Creado por:** [Tu nombre o alias aquí]
+**🛠 Creado por:** G0jira
 
 ---
 
